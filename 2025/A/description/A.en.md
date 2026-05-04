@@ -1,0 +1,58 @@
+# Problem A - Apple Pie
+
+Asdrubal likes writing sequences of integers and eating apple pie. Sometimes he does both things simultaneously. These days he is interested in sequences of a particular type. Given an integer $N \ge 2$, he wants to find a sequence such that each set of two different integers between 1 and $N$ appears exactly once in adjacent positions of the sequence. Besides, no other integers can appear in the sequence.
+
+For instance, for $N = 2$, there is a single set of two different integers between 1 and $N$, which is the set $\{1, 2\}$. Thus, Asdrubal would be satisfied with the sequence $[1, 2]$. The only other possibility is the sequence $[2, 1]$.
+
+For $N = 3$, there are three sets of two different integers between 1 and $N$: $\{1, 2\}$, $\{1, 3\}$ and $\{2, 3\}$. In this case a valid sequence is $[2, 1, 3, 2]$, since the set $\{1, 2\}$ only appears in the first two positions, the set $\{1, 3\}$ only appears in the middle, and the set $\{2, 3\}$ only appears in the last two positions, with no other integers appearing in the sequence. On the other hand, the sequences $[2, 1, 3]$, $[2, 1, 3, 2, 1]$ and $[2, 1, 3, 2, 2]$ are invalid.
+
+Asdrubal thinks he has just written one of his sequences for a certain $N$. He was about to check whether the sequence was actually valid, when some apple pie fell on the paper. The apple pie covered zero or more elements of the sequence, splitting the rest into two (possibly empty) parts, one on the left of the apple pie, and one on the right. Given the left and right portions of the sequence not covered by apple pie, you must determine whether the original full sequence could have been valid.
+
+## Input
+
+The first line contains an integer $N$ ($2 \le N \le 1000$).
+
+The next line contains an integer $P$ ($0 \le P \le 5 \cdot 10^5$) indicating the number of integers on the left of the apple pie, followed by those $P$ integers $L_1, L_2, \ldots, L_P$ ($1 \le L_i \le N$ for $i = 1, 2, \ldots, P$).
+
+The next line contains an integer $Q$ ($0 \le Q \le 5 \cdot 10^5$) representing the number of integers on the right of the apple pie, followed by those $Q$ integers $R_1, R_2, \ldots, R_Q$ ($1 \le R_i \le N$ for $i = 1, 2, \ldots, Q$).
+
+Both the left and right portions of the sequence are described from left to right.
+
+## Output
+
+Output a single line with the uppercase letter "Y" if the original full sequence could have been valid, and the uppercase letter "N" otherwise.
+
+## Samples
+
+| Sample input 1 | Sample output 1 |
+|:---------------|:----------------|
+| `2`<br>`0`<br>`0` | `Y`             |
+
+**Explanation of sample 1:**
+In this case $N = 2$ and the apple pie covered the whole sequence ($P = Q = 0$). Since there is at least a valid sequence for $N = 2$ (for instance, $[1, 2]$), the sequence written by Asdrubal could have been valid.
+
+| Sample input 2 | Sample output 2 |
+|:---------------|:----------------|
+| `3`<br>`1 2`<br>`0` | `Y`             |
+
+**Explanation of sample 2:**
+Here $N = 3$ and the apple pie covered all but the first element of the sequence ($P = 1$ and $Q = 0$). Since there is at least a valid sequence for $N = 3$ that starts with $L_1 = 2$ (such as $[2, 1, 3, 2]$), it follows that the original full sequence could have been valid.
+
+| Sample input 3 | Sample output 3 |
+|:---------------|:----------------|
+| `3`<br>`2 2 1`<br>`2 3 2` | `Y`             |
+
+**Explanation of sample 3:**
+Again $N = 3$, but now the apple pie covered zero or more elements in the middle of the sequence. Since there is at least a valid sequence for $N = 3$ that starts with $[2, 1, \ldots]$, then have zero or more elements in the middle, and finally ends with $[\ldots, 3, 2]$ (again $[2, 1, 3, 2]$), we know that the sequence written by Asdrubal could have been valid.
+
+| Sample input 4 | Sample output 4 |
+|:---------------|:----------------|
+| `3`<br>`2 2 1`<br>`1 3` | `N`             |
+
+| Sample input 5 | Sample output 5 |
+|:---------------|:----------------|
+| `3`<br>`2 2 1`<br>`2 2 1` | `N`             |
+
+| Sample input 6 | Sample output 6 |
+|:---------------|:----------------|
+| `3`<br>`2 2 1`<br>`2 2 2` | `N`             |

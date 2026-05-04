@@ -1,0 +1,163 @@
+#!/usr/bin/env python3
+import sys
+
+# Uses the set of 12 bases proven to provide a deterministic Miller-Rabin
+# test for all odd composite numbers n < 2^64 (18,446,744,073,709,551,616)
+# Source: https://cp-algorithms.com/algebra/primality_tests.html
+# Translated from C++ to Python using ChatGPT (and manually reviewed)
+def binpower(base: int, e: int, mod: int) -> int:
+    result = 1
+    base %= mod
+    while e > 0:
+        if e % 2 == 1:
+            result = (result * base) % mod
+        base = (base * base) % mod
+        e //= 2
+    return result
+
+def check_composite(n: int, a: int, d: int, s: int) -> bool:
+    x = binpower(a, d, n)
+    if x == 1 or x == n - 1:
+        return False
+    for _ in range(1, s):
+        x = (x * x) % n
+        if x == n - 1:
+            return False
+    return True
+
+def MillerRabin(n: int) -> bool:  # returns True if n is prime, else False
+    if n < 2:
+        return False
+
+    r = 0
+    d = n - 1
+    while d % 2 == 0:
+        d //= 2
+        r += 1
+
+    # Deterministic bases for 64-bit integers
+    for a in [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37]:
+        if n == a:
+            return True
+        if n%a == 0 or check_composite(n, a, d, r):
+            return False
+    return True
+
+# Ends Miller-Rabin code
+
+def AC(msg):
+  print(f'YES! {msg}', file=sys.stderr)
+  sys.exit(4)
+
+
+def WA(msg):
+  print(f'NO :/ {msg}', file=sys.stderr)
+  sys.exit(6)
+
+
+def BAD_JUDGE(msg):
+  print(f'unexpected judge behaviour, {msg}', file=sys.stderr)
+  sys.exit(43)
+
+# Gets content from file and returns a list with its tokens
+def tokenize_content(file):
+   return [token for line in file.readlines() for token in line.split()]
+
+# Read input / output and returns a list with its tokens
+def read_xput(filename):
+  with open(filename, 'r') as xput_file:
+    xput = tokenize_content(xput_file)
+  return xput
+
+def parse_integer(s, name, on_error) -> int:
+  try:
+    return int(s)
+  except ValueError as e:
+    on_error(f"{name} is not a valid integer: {e=}")
+
+def check_bounds(value, min_value, max_value, name, on_error):
+  if value < min_value or value > max_value:
+    on_error(f"{name}={value} is not within the allowed range {min_value=}..{max_value=}")
+
+# Checks output is a valid factorization and returns Y,
+# the integer corresponding to the given factorization
+def parse_output(X, output, on_error):
+  # Even though python has arbitrary int precision, handle output with care
+  # to avoid taking too long. Cut early if K, p, e or Y are too big.
+  MIN_K = 1
+  MAX_K = 4000 # correct answers must have less than 4000 prime factors
+  MIN_P = 2
+  MAX_P = 10**18
+  MIN_E = 1
+  MAX_E = 4000 # 2 * 10^1000 < 2^4000, so a bigger exponent must be wrong
+
+  if len(output) == 0:
+    on_error("output is empty, 0 tokens found")
+
+  k = parse_integer(output[0], "k", on_error)
+  check_bounds(k, MIN_K, MAX_K, "k", on_error)
+
+  if len(output) != 2*k+1:
+    on_error(f"invalid number of tokens, expected 2*k+1, but {k=} and #tokens = {len(output)}")
+
+  pl = [parse_integer(output[1 + 2*i], f"p{i}", on_error) for i in range(k)]
+  el = [parse_integer(output[1 + 2*i+1], f"e{i}", on_error) for i in range(k)]
+
+  if len(pl) != len(set(pl)):
+    on_error("output contains repeated values of p")
+
+  for p in pl:
+    check_bounds(p, MIN_P, MAX_P, "p", on_error)
+    if not MillerRabin(p):
+      on_error(f"p is not prime {p=}")
+
+  for e in el:
+    check_bounds(e, MIN_E, MAX_E, "e", on_error)
+
+  Y = 1
+  for i in range(k):
+    p = pl[i]
+    e = el[i]
+    aux = p**e
+    if aux > 2*X:
+      on_error(f"p^e is bigger than 2*X {p=} {e=} {X=}")
+    Y *= aux
+    if Y > 2*X:
+      on_error(f"Y is bigger than 2*X {Y=} {X=}")
+  return Y
+
+# Returns X, the only integer present in the input
+# Input is assumed to be valid, as that's checked by another checker
+def parse_input(input: list) -> int:
+  assert(len(input) == 1)
+  X = parse_integer(input[0], "X", BAD_JUDGE)
+  return X
+
+# Checks relative error of Y, calls on_error if too high
+def check_error(X: int, Y: int, on_error):
+  float_error = abs(Y-X)/X
+  # Check using integers instead of floats
+  if abs(Y - X) * 10**9 > X:
+    on_error(f"relative error is too big (|Y-X| * 10^9 > X): {float_error:.10f}")
+  return float_error
+
+try:
+  team_output_fn = sys.argv[1]
+  jury_output_fn = sys.argv[2]
+  problem_input_fn = sys.argv[3]
+
+  team_output = read_xput(team_output_fn)
+  jury_output = read_xput(jury_output_fn)
+  problem_input = read_xput(problem_input_fn)
+
+  X = parse_input(problem_input)
+  Y_jury = parse_output(X, jury_output, BAD_JUDGE)
+  Y_team = parse_output(X, team_output, WA)
+
+  jury_error = check_error(X, Y_jury, BAD_JUDGE)
+  team_error = check_error(X, Y_team, WA)
+  AC(f'Correct answer! :)  error = {team_error:.10f}')
+except Exception as e:
+  BAD_JUDGE(f'something bad happened: {e}')
+
+BAD_JUDGE('no veredict found')
