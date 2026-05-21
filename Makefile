@@ -9,11 +9,12 @@ INPUTS = docs/data-structure/*.md docs/algorithms/*.md docs/math/*.md
 all: pdf
 
 pdf:
-	@echo "Generating PDF using Pandoc inside Docker..."
-	@echo "This might take a moment to download the pandoc/extra image on the first run."
+	@echo "Building custom Pandoc Docker image with Inconsolata font..."
+	docker build -t custom-pandoc .
+	@echo "Generating PDF using custom Pandoc image..."
 	docker run --rm \
 		-v "$$(pwd):/data" \
-		pandoc/extra \
+		custom-pandoc \
 		--pdf-engine=xelatex \
 		-V geometry:margin=0.5in \
 		-V monofont="Inconsolata" \
