@@ -15,7 +15,8 @@ pdf:
 		-v "$$(pwd):/data" \
 		pandoc/extra \
 		--pdf-engine=xelatex \
-		-V geometry:margin=1in \
+		-V geometry:margin=0.5in \
+		-V monofont="Inconsolata" \
 		--toc \
 		--toc-depth=2 \
 		$(INPUTS) -o $(OUTPUT)
