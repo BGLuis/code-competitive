@@ -1,53 +1,43 @@
 #include <iostream>
 #include <vector>
+#include <iomanip>
+#include <algorithm>
 
 using namespace std;
 
-const int MOD = 998244353;
-
 int main() {
-    ios::sync_with_stdio(false);
+    ios_base::sync_with_stdio(false);
     cin.tie(NULL);
 
-    long long N;
-    int K;
-    if (!(cin >> N >> K)) return 0;
+    vector<vector<int>> A(3, vector<int>(6));
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 6; ++j) {
+            if (!(cin >> A[i][j])) return 0;
+        }
+    }
 
-    // dp[q] is the number of sequences of length i with sum/i = q
-    vector<int> dp(K + 1, 1);
-    dp[0] = 0;
-
-    int limit = (N < (long long)K) ? (int)N : K;
-
-    for (int i = 2; i <= limit; ++i) {
-        vector<int> new_dp_diff(K + 2, 0);
-        for (int q_old = 1; q_old <= K; ++q_old) {
-            if (dp[q_old] == 0) continue;
-            
-            // For each q_old, we need b_i = q_old + m*i in [1, K]
-            // q_new = q_old + m
-            int low = q_old - (q_old - 1) / i;
-            int high = q_old + (K - q_old) / i;
-            
-            if (low <= K) {
-                new_dp_diff[low] = (new_dp_diff[low] + dp[q_old]) % MOD;
-                if (high + 1 <= K) {
-                    new_dp_diff[high + 1] = (new_dp_diff[high + 1] - dp[q_old] + MOD) % MOD;
+    int match_count = 0;
+    for (int i = 0; i < 6; ++i) {
+        for (int j = 0; j < 6; ++j) {
+            for (int k = 0; k < 6; ++k) {
+                int x = A[0][i];
+                int y = A[1][j];
+                int z = A[2][k];
+                
+                if ((x == 4 && y == 5 && z == 6) ||
+                    (x == 4 && y == 6 && z == 5) ||
+                    (x == 5 && y == 4 && z == 6) ||
+                    (x == 5 && y == 6 && z == 4) ||
+                    (x == 6 && y == 4 && z == 5) ||
+                    (x == 6 && y == 5 && z == 4)) {
+                    match_count++;
                 }
             }
         }
-        int curr = 0;
-        for (int q = 1; q <= K; ++q) {
-            curr = (curr + new_dp_diff[q]) % MOD;
-            dp[q] = curr;
-        }
     }
 
-    long long total = 0;
-    for (int q = 1; q <= K; ++q) {
-        total = (total + dp[q]) % MOD;
-    }
-    cout << total << endl;
+    double probability = (double)match_count / 216.0;
+    cout << fixed << setprecision(10) << probability << "\n";
 
     return 0;
 }
