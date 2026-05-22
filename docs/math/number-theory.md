@@ -18,9 +18,17 @@ $$\mathcal{B} = \{2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37\}$$
 #### 3. Prime Factorization
 - **Trial Division**: Extracts all prime factors of $N$ by checking divisibility up to $\sqrt{N}$ in $O(\sqrt{N})$ time. This is extremely robust and fast for numbers up to $10^{12}$.
 
+#### 4. Binomial Coefficients (nCr) Modulo P
+In combinatorics, calculating $\binom{n}{r} \pmod P$ (where $P$ is a large prime like $10^9+7$) is ubiquitous.
+$$\binom{n}{r} = \frac{n!}{r!(n-r)!} \pmod P$$
+Since division is not directly possible under modulo, we multiply by the **Modular Inverse** of the denominator:
+$$\binom{n}{r} \equiv n! \cdot (r!)^{-1} \cdot ((n-r)!)^{-1} \pmod P$$
+We can precompute all factorials and their inverse factorials up to $N$ in $O(N)$ time. Then, any $nCr$ query can be answered in $O(1)$ time!
+
 ---
 
 ## Complexity Analysis
+- **Binomial Coefficients**: $O(N)$ to precompute factorials and inverses, then $O(1)$ per query. Space is $O(N)$ for the arrays.
 - **Modular Exponentiation**: $O(\log P)$ time, $O(1)$ space.
 - **Modular Inverse**: $O(\log M)$ time, $O(1)$ space.
 - **Miller-Rabin Primality Test**: $O(K \log^3 N)$ where $K$ is the number of bases tested (at most 12 for 64-bit numbers). This takes less than a microsecond.
@@ -138,6 +146,29 @@ std::vector<long long> factorize(long long n) {
     }
     return factors;
 }
+
+// 4. Binomial Coefficients Precomputation
+const int MAXN = 200005;
+const long long MOD = 1e9 + 7;
+long long fact[MAXN], invFact[MAXN];
+
+void precompute_factorials() {
+    fact[0] = 1;
+    invFact[0] = 1;
+    for (int i = 1; i < MAXN; ++i) {
+        fact[i] = (fact[i - 1] * i) % MOD;
+    }
+    // Fermat's Little Theorem for inverse of fact[MAXN-1]
+    invFact[MAXN - 1] = power_mod(fact[MAXN - 1], MOD - 2, MOD);
+    for (int i = MAXN - 2; i >= 1; --i) {
+        invFact[i] = (invFact[i + 1] * (i + 1)) % MOD;
+    }
+}
+
+long long nCr(int n, int r) {
+    if (r < 0 || r > n) return 0;
+    return fact[n] * invFact[r] % MOD * invFact[n - r] % MOD;
+}
 ```
 
 ---
@@ -233,6 +264,29 @@ def factorize(n: int) -> List[int]:
     if temp > 1:
         factors.append(temp)
     return factors
+
+
+# 4. Binomial Coefficients Precomputation
+MAXN = 200005
+MOD = 10**9 + 7
+fact = [1] * MAXN
+invFact = [1] * MAXN
+
+
+def precompute_factorials():
+    global fact, invFact
+    for i in range(1, MAXN):
+        fact[i] = (fact[i - 1] * i) % MOD
+        
+    invFact[MAXN - 1] = power_mod(fact[MAXN - 1], MOD - 2, MOD)
+    for i in range(MAXN - 2, 0, -1):
+        invFact[i] = (invFact[i + 1] * (i + 1)) % MOD
+
+
+def nCr(n: int, r: int) -> int:
+    if r < 0 or r > n:
+        return 0
+    return (fact[n] * invFact[r] % MOD) * invFact[n - r] % MOD
 ```
 
 ---
@@ -262,7 +316,12 @@ int main() {
     for (long long f : factors) {
         std::cout << f << " ";
     }
-    std::cout << "\n";
+    std::cout << "\n\n";
+
+    // 4. Binomial Coefficients
+    precompute_factorials();
+    std::cout << "5 choose 2 = " << nCr(5, 2) << " (expected 10)\n";
+    std::cout << "100 choose 50 mod 10^9+7 = " << nCr(100, 50) << "\n";
 
     return 0;
 }
@@ -283,5 +342,10 @@ if __name__ == "__main__":
 
     # 3. Factorization
     num = 1234567890
-    print(f"Prime factors of {num}: {factorize(num)}")
+    print(f"Prime factors of {num}: {factorize(num)}\n")
+
+    # 4. Binomial Coefficients
+    precompute_factorials()
+    print(f"5 choose 2 = {nCr(5, 2)} (expected 10)")
+    print(f"100 choose 50 mod 10^9+7 = {nCr(100, 50)}")
 ```

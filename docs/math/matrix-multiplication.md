@@ -19,6 +19,12 @@ Using the **binary exponentiation** (divide-and-conquer) technique, we can compu
 - If $K$ is odd, $M^K = M \times M^{K-1}$.
 - If $K$ is even, $M^K = (M^{K/2})^2$.
 
+### Min-Plus (Tropical) Matrix Algebra
+In the **Tropical Semiring**, standard arithmetic operations are replaced: addition becomes $\min(a, b)$, and multiplication becomes addition $a + b$. 
+When we multiply two matrices $A$ and $B$ under this algebra, the product $C$ is computed as:
+$$C_{i, j} = \min_{k} (A_{i, k} + B_{k, j})$$
+This is heavily used to find the **Shortest Path of exact length $K$** between nodes in a graph. Raising an adjacency matrix (where $A_{i, j}$ is the edge weight, and $\infty$ if no edge) to the $K$-th power using Min-Plus multiplication yields the minimum cost to travel from $i$ to $j$ using exactly $K$ edges!
+
 ---
 
 ## Complexity Analysis
@@ -98,6 +104,51 @@ public:
         }
     }
 };
+
+// A Matrix variant using the Min-Plus Algebra (Tropical Semiring)
+class MatrixMinPlus {
+public:
+    int rows, cols;
+    std::vector<std::vector<long long>> mat;
+    long long INF = 1e18; // Represents "infinity" / no path
+
+    MatrixMinPlus(int r, int c, long long default_val)
+        : rows(r), cols(c), mat(r, std::vector<long long>(c, default_val)) {}
+
+    // Identity for Min-Plus algebra: 0 on diagonal, INF elsewhere
+    static MatrixMinPlus identity(int n, long long INF = 1e18) {
+        MatrixMinPlus I(n, n, INF);
+        for (int i = 0; i < n; ++i) {
+            I.mat[i][i] = 0;
+        }
+        return I;
+    }
+
+    MatrixMinPlus operator*(const MatrixMinPlus& other) const {
+        MatrixMinPlus res(rows, other.cols, INF);
+        for (int i = 0; i < rows; ++i) {
+            for (int k = 0; k < cols; ++k) {
+                if (mat[i][k] == INF) continue; 
+                for (int j = 0; j < other.cols; ++j) {
+                    if (other.mat[k][j] == INF) continue;
+                    res.mat[i][j] = std::min(res.mat[i][j], mat[i][k] + other.mat[k][j]);
+                }
+            }
+        }
+        return res;
+    }
+
+    MatrixMinPlus power(long long exp) const {
+        MatrixMinPlus res = MatrixMinPlus::identity(rows, INF);
+        MatrixMinPlus base = *this;
+        while (exp > 0) {
+            if (exp & 1) res = res * base;
+            base = base * base;
+            exp >>= 1;
+        }
+        return res;
+    }
+};
 ```
 
 ---
@@ -167,6 +218,47 @@ class Matrix:
 
     def __str__(self) -> str:
         return "\n".join(" ".join(map(str, row)) for row in self.mat)
+
+
+class MatrixMinPlus:
+    def __init__(self, rows: int, cols: int, default_val: int):
+        self.rows = rows
+        self.cols = cols
+        self.INF = 10**18
+        self.mat = [[default_val] * cols for _ in range(rows)]
+
+    @classmethod
+    def identity(cls, n: int) -> "MatrixMinPlus":
+        """Creates an n x n identity matrix for Min-Plus algebra."""
+        I = cls(n, n, 10**18)
+        for i in range(n):
+            I.mat[i][i] = 0
+        return I
+
+    def __mul__(self, other: "MatrixMinPlus") -> "MatrixMinPlus":
+        res = MatrixMinPlus(self.rows, other.cols, self.INF)
+        for i in range(self.rows):
+            for k in range(self.cols):
+                if self.mat[i][k] == self.INF:
+                    continue
+                for j in range(other.cols):
+                    if other.mat[k][j] == self.INF:
+                        continue
+                    res.mat[i][j] = min(
+                        res.mat[i][j], self.mat[i][k] + other.mat[k][j]
+                    )
+        return res
+
+    def power(self, exp: int) -> "MatrixMinPlus":
+        res = MatrixMinPlus.identity(self.rows)
+        base = self
+        curr_exp = exp
+        while curr_exp > 0:
+            if curr_exp & 1:
+                res = res * base
+            base = base * base
+            curr_exp >>= 1
+        return res
 ```
 
 ---
@@ -200,7 +292,16 @@ int main() {
     std::cout << "F_" << N << " mod 10^9+7 = " << fibonacci(N) << " (expected 55)\n";
 
     N = 1000000000000LL; // 10^12
-    std::cout << "F_" << N << " mod 10^9+7 = " << fibonacci(N) << "\n";
+    std::cout << "F_" << N << " mod 10^9+7 = " << fibonacci(N) << "\n\n";
+
+    // Min-Plus Example
+    MatrixMinPlus M(3, 3, 1e18);
+    M.mat[0][1] = 5;
+    M.mat[1][2] = 3;
+    M.mat[0][2] = 10;
+    MatrixMinPlus M2 = M.power(2);
+    std::cout << "Min-Plus Example (Shortest Path of length 2 from 0 to 2): " 
+              << M2.mat[0][2] << " (expected 8)\n";
 
     return 0;
 }
@@ -231,4 +332,13 @@ if __name__ == "__main__":
 
     N = 1000000000000  # 10^12
     print(f"F_{N} mod 10^9+7 = {fibonacci(N)}")
+
+    # Min-Plus Example
+    print("\nMin-Plus Example (Shortest Path of length 2):")
+    M = MatrixMinPlus(3, 3, 10**18)
+    M.mat[0][1] = 5
+    M.mat[1][2] = 3
+    M.mat[0][2] = 10
+    M2 = M.power(2)
+    print(f"Shortest path from 0 to 2 using exactly 2 edges: {M2.mat[0][2]} (expected 8)")
 ```

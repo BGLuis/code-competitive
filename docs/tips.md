@@ -20,6 +20,7 @@
 - Segment Tree
 - Segment Tree with Lazy Propagation
 - Simple Linked List
+- Square Root Decomposition
 - Stack
 
 ## Algorithms
@@ -50,6 +51,7 @@
 ## Math
 
 - 128-bit Arithmetic
+- Binomial Coefficients / Combinatorics (nCr)
 - Bounding Box / Bounding Rectangle
 - Chebyshev Distance
 - Convex Optimization / Concavity
