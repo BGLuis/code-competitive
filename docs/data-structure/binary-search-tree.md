@@ -2,34 +2,54 @@
 
 ## Conceptual Explanation
 
-A **Binary Search Tree (BST)** is a hierarchical node-based data structure where each node has at most two children, referred to as the left child and the right child. The tree maintains the **BST property**:
-- The left subtree of a node contains only nodes with keys **less than** the node's key.
-- The right subtree of a node contains only nodes with keys **greater than** the node's key.
+A **Binary Search Tree (BST)** is a hierarchical node-based data structure where
+each node has at most two children, referred to as the left child and the right
+child. The tree maintains the **BST property**:
+
+- The left subtree of a node contains only nodes with keys **less than** the
+  node's key.
+- The right subtree of a node contains only nodes with keys **greater than** the
+  node's key.
 - Both the left and right subtrees must also be binary search trees.
 
 ### Core Logic & Operations
-1. **Search**: Compare the target value with the root. If they are equal, the target is found. If the target is smaller, recurse on the left child; if larger, recurse on the right child. If a null pointer is reached, the value does not exist.
-2. **Insertion**: Traverse the tree similarly to searching until finding a null spot where the node can be inserted while maintaining the BST property.
+
+1. **Search**: Compare the target value with the root. If they are equal, the
+   target is found. If the target is smaller, recurse on the left child; if
+   larger, recurse on the right child. If a null pointer is reached, the value
+   does not exist.
+2. **Insertion**: Traverse the tree similarly to searching until finding a null
+   spot where the node can be inserted while maintaining the BST property.
 3. **Deletion**: Deletion is slightly more complex and involves three scenarios:
    - **Node to delete is a leaf**: Simply remove the node.
    - **Node to delete has one child**: Replace the node with its child.
-   - **Node to delete has two children**: Find the in-order successor (the smallest node in the right subtree) or in-order predecessor (the largest node in the left subtree), copy its value to the target node, and then recursively delete that successor/predecessor node.
+   - **Node to delete has two children**: Find the in-order successor (the
+     smallest node in the right subtree) or in-order predecessor (the largest
+     node in the left subtree), copy its value to the target node, and then
+     recursively delete that successor/predecessor node.
 
 ### Typical Competitive Programming Use Cases
-While standard unbalanced BSTs are rarely used directly in competitive programming due to their potential to degrade into $O(N)$ skew trees, they form the foundational understanding for balanced BSTs (like AVL, Red-Black Trees, Treaps, and Splay Trees). They are also used for implementing custom sorting or tracking hierarchies when the input is guaranteed to be random or ordered in a way that prevents degeneration.
+
+While standard unbalanced BSTs are rarely used directly in competitive
+programming due to their potential to degrade into $O(N)$ skew trees, they form
+the foundational understanding for balanced BSTs (like AVL, Red-Black Trees,
+Treaps, and Splay Trees). They are also used for implementing custom sorting or
+tracking hierarchies when the input is guaranteed to be random or ordered in a
+way that prevents degeneration.
 
 ---
 
 ## Complexity Analysis
 
-| Operation | Average Case | Worst Case |
-| :--- | :--- | :--- |
-| **Search** | $O(\log N)$ | $O(N)$ |
-| **Insertion** | $O(\log N)$ | $O(N)$ |
-| **Deletion** | $O(\log N)$ | $O(N)$ |
-| **Space Complexity** | $O(N)$ | $O(N)$ |
+| Operation            | Average Case | Worst Case |
+| :------------------- | :----------- | :--------- |
+| **Search**           | $O(\log N)$  | $O(N)$     |
+| **Insertion**        | $O(\log N)$  | $O(N)$     |
+| **Deletion**         | $O(\log N)$  | $O(N)$     |
+| **Space Complexity** | $O(N)$       | $O(N)$     |
 
-*Note: The worst-case complexities occur when the tree becomes skewed (e.g., inserting sorted keys).*
+_Note: The worst-case complexities occur when the tree becomes skewed (e.g.,
+inserting sorted keys)._
 
 ---
 
@@ -351,3 +371,4 @@ if __name__ == '__main__':
     print("Deleting 50 (node with two children)...")
     bst.remove(50)
     print("Inorder traversal:", bst.inorder_traversal())
+```
